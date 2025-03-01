@@ -1,7 +1,7 @@
 export type Income = {
   id: string;
   category: string;
-  date: string;
+  date: Date;
   profit: number;
   comments?: string;
   owner: string;
