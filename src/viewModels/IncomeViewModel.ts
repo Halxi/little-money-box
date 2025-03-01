@@ -2,9 +2,12 @@ import { create } from 'zustand';
 import { Income } from '../models/Income';
 import { persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
+import { router } from 'expo-router';
 
 interface IncomeState {
   incomes: Income[];
+  totalIncome: number;
   addIncome: (income: Income) => void;
   isHydrated: boolean;
   setHydrated: () => void; // Define setHydrated in the type
@@ -15,19 +18,41 @@ interface IncomeState {
   deleteIncome: (id: string) => void;
 }
 
+function handleTotalIncome(state: IncomeState, income: Income) {
+  const newTotal = state.totalIncome + income.profit;
+  if (newTotal >= 300) {
+    Alert.alert(
+      'Investment Opportunity',
+      'Your total income has reached 300! Consider investing.',
+      [
+        {
+          text: 'Invest Now',
+          onPress: () => router.push('/InvestmentScreen'),
+        },
+      ],
+    );
+    return {
+      incomes: [...state.incomes, income],
+      totalIncome: newTotal - 300, // Reset after alert
+    };
+  }
+  return {
+    incomes: [...state.incomes, income],
+    totalIncome: newTotal,
+  };
+}
+
 // Create store
 export const useIncomeStore = create<IncomeState>()(
   persist(
     (set) => ({
       incomes: [],
+      totalIncome: 0, // Initially 0
       isHydrated: false, // Initially false
       sortBy: 'date', // Default sorting field
       sortOrder: 'desc', // 'asc' or 'desc'
 
-      addIncome: (income) =>
-        set((state) => ({
-          incomes: [...state.incomes, income],
-        })),
+      addIncome: (income) => set((state) => handleTotalIncome(state, income)),
 
       setHydrated: () => set({ isHydrated: true }), // Set hydration state
 
@@ -37,11 +62,23 @@ export const useIncomeStore = create<IncomeState>()(
           sortOrder: state.sortOrder === 'asc' ? 'desc' : 'asc', // Toggle order
         })),
       editIncome: (updatedIncome) =>
-        set((state) => ({
-          incomes: state.incomes.map((income) =>
-            income.id === updatedIncome.id ? updatedIncome : income,
-          ),
-        })),
+        set((state) => {
+          const oldIncome = state.incomes.find(
+            (inc) => inc.id === updatedIncome.id,
+          );
+          const oldProfit = oldIncome ? oldIncome.profit : 0;
+
+          // Remove old profit and add new profit
+          const adjustedState = {
+            ...state,
+            totalIncome: state.totalIncome - oldProfit, // Subtract old profit first
+            incomes: state.incomes.map((income) =>
+              income.id === updatedIncome.id ? updatedIncome : income,
+            ),
+          };
+
+          return handleTotalIncome(adjustedState, updatedIncome);
+        }),
       deleteIncome: (id) =>
         set((state) => ({
           incomes: state.incomes.filter((income) => income.id !== id),
@@ -73,22 +110,10 @@ export const useIncomeStore = create<IncomeState>()(
 );
 
 export class IncomeViewModel {
-  incomes: {
-    date: string;
-    category: string;
-    profit: number;
-    comments?: string;
-    owner: string;
-  }[] = [];
+  incomes: Income[] = [];
   totalIncome: number = 0;
 
-  addIncome(income: {
-    date: string;
-    category: string;
-    profit: number;
-    comments?: string;
-    owner: string;
-  }) {
+  addIncome(income: Income) {
     this.incomes.push(income);
     this.totalIncome += income.profit;
   }

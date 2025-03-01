@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, TextInput, Button, Text } from 'react-native';
+import { Modal, View, TextInput, Button, Text, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useIncomeStore } from '../viewModels/IncomeViewModel';
 import { Income } from '../models/Income';
+import { router } from 'expo-router';
 
 interface IncomeModalProps {
   visible: boolean;
@@ -23,7 +24,7 @@ export default function IncomeModal({
   const [comments, setComments] = useState(' ');
   const [error, setError] = useState('');
 
-  const { addIncome, editIncome } = useIncomeStore();
+  const { addIncome, editIncome, totalIncome } = useIncomeStore();
 
   useEffect(() => {
     if (initialData) {
@@ -59,6 +60,23 @@ export default function IncomeModal({
       comments,
     };
     initialData ? editIncome(newIncome) : addIncome(newIncome);
+
+    if (totalIncome >= 300) {
+      Alert.alert(
+        'Investment Opportunity',
+        'Your total income has reached 300. Consider investing!',
+        [
+          {
+            text: 'Invest Now',
+            onPress: () => {
+              router.push('/InvestmentScreen'); // Navigate to the investment screen
+            },
+          },
+          { text: 'Cancel', style: 'cancel' },
+        ],
+      );
+    }
+
     resetForm();
     onClose();
   };
