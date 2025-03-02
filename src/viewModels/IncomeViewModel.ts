@@ -27,7 +27,7 @@ function handleTotalIncome(state: IncomeState, income: Income) {
       [
         {
           text: 'Invest Now',
-          onPress: () => router.push('/InvestmentScreen'),
+          onPress: () => router.push('/investment'),
         },
       ],
     );
@@ -108,21 +108,3 @@ export const useIncomeStore = create<IncomeState>()(
     },
   ),
 );
-
-export class IncomeViewModel {
-  incomes: Income[] = [];
-  totalIncome: number = 0;
-
-  addIncome(income: Income) {
-    this.incomes.push(income);
-    this.totalIncome += income.profit;
-  }
-
-  shouldShowInvestmentPopup(): boolean {
-    return this.totalIncome >= 300;
-  }
-
-  resetIncomeAfterInvestment() {
-    this.totalIncome -= 300; // Deduct 300 when the user decides to invest
-  }
-}

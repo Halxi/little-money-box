@@ -1,30 +1,28 @@
-import { Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 
 export default function Layout() {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: '#f4511e',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
-    >
-      <Stack.Screen
-        name="InvestmentScreen"
-        options={{
-          headerTitle: 'Investment Records',
-        }}
-      />
-      <Stack.Screen
+    <Tabs screenOptions={{ tabBarActiveTintColor: 'blue', headerShown: false }}>
+      <Tabs.Screen
         name="index"
         options={{
-          headerTitle: 'Home',
+          title: 'Income',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
         }}
       />
-    </Stack>
+      <Tabs.Screen
+        name="investment"
+        options={{
+          title: 'Investment',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="trending-up" size={size} color={color} />
+          ),
+          headerTitle: 'My Investments',
+        }}
+      />
+    </Tabs>
   );
 }

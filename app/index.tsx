@@ -1,13 +1,12 @@
-import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useIncomeStore } from '@/src/viewModels/IncomeViewModel';
 import { useState } from 'react';
 import IncomeModal from '@/src/components/IncomeModal';
 import { IncomeList } from '@/src/components/IncomeList';
 import { Income } from '@/src/models/Income';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen() {
-  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
 
@@ -20,14 +19,18 @@ export default function HomeScreen() {
 
   if (isHydrated) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.title}>Welcome to Little Money Box!</Text>
-        <Button title="Add Income" onPress={() => setModalVisible(true)} />
-        <Button
-          title="View Investment"
-          onPress={() => router.push('/InvestmentScreen')}
-        />
+
         <IncomeList onEdit={openEditModal} />
+
+        {/* Floating Action Button */}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setModalVisible(true)}
+        >
+          <Ionicons name="add" size={32} color="white" />
+        </TouchableOpacity>
 
         <IncomeModal
           visible={modalVisible}
@@ -37,7 +40,7 @@ export default function HomeScreen() {
           }}
           initialData={selectedIncome}
         />
-      </View>
+      </SafeAreaView>
     );
   }
 }
@@ -45,13 +48,28 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 1,
+    paddingTop: 20,
+    marginHorizontal: 5,
     backgroundColor: '#f5f5f5',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    backgroundColor: '#6200ee',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginVertical: 10,
     textAlign: 'center',
   },
 

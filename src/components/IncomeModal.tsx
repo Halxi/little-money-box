@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, TextInput, Button, Text, Alert } from 'react-native';
+import {
+  Modal,
+  View,
+  TextInput,
+  Button,
+  Text,
+  Alert,
+  StyleSheet,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useIncomeStore } from '../viewModels/IncomeViewModel';
@@ -9,7 +17,7 @@ import { router } from 'expo-router';
 interface IncomeModalProps {
   visible: boolean;
   onClose: () => void;
-  initialData?: Income | null; // If editing, pass existing income data
+  initialData?: Income | null;
 }
 
 export default function IncomeModal({
@@ -49,10 +57,10 @@ export default function IncomeModal({
       setError('Profit is required and must be a valid number.');
       return;
     }
+    setError('');
 
-    setError(''); // Clear error if validation passes
     const newIncome: Income = {
-      id: initialData ? initialData.id : Date.now().toString(), // Reuse ID for editing
+      id: initialData ? initialData.id : Date.now().toString(),
       date,
       category,
       profit: Number(profit),
@@ -66,12 +74,7 @@ export default function IncomeModal({
         'Investment Opportunity',
         'Your total income has reached 300. Consider investing!',
         [
-          {
-            text: 'Invest Now',
-            onPress: () => {
-              router.push('/InvestmentScreen'); // Navigate to the investment screen
-            },
-          },
+          { text: 'Invest Now', onPress: () => router.push('/investment') },
           { text: 'Cancel', style: 'cancel' },
         ],
       );
@@ -80,58 +83,44 @@ export default function IncomeModal({
     resetForm();
     onClose();
   };
+
   return (
-    <Modal visible={visible} animationType="slide" transparent={true}>
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: 'white',
-            padding: 20,
-            borderRadius: 10,
-            width: '80%',
-          }}
-        >
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
-            Enter Income Details
-          </Text>
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.title}>Enter Income Details</Text>
           <Text>Profit:</Text>
           <TextInput
             placeholder="Enter profit"
             keyboardType="numeric"
             value={profit}
             onChangeText={setProfit}
-            style={{ borderBottomWidth: 1, marginBottom: 10 }}
+            style={styles.input}
             maxLength={10}
           />
-          {error ? (
-            <Text style={{ color: 'red', marginBottom: 5 }}>{error}</Text>
-          ) : null}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
           <Text>Category:</Text>
           <Picker
             selectedValue={category}
             onValueChange={setCategory}
-            style={{ marginBottom: 10 }}
+            style={styles.picker}
           >
             <Picker.Item label="Second-hand Sell" value="Second-hand Sell" />
             <Picker.Item label="Fruit Sell" value="Fruit Sell" />
             <Picker.Item label="Cashback" value="Cashback" />
           </Picker>
+
           <Text>Owner:</Text>
           <Picker
             selectedValue={owner}
             onValueChange={setOwner}
-            style={{ marginBottom: 10 }}
+            style={styles.picker}
           >
             <Picker.Item label="DD" value="DD" />
             <Picker.Item label="RR" value="RR" />
           </Picker>
+
           <Text>Date:</Text>
           <DateTimePicker
             value={date}
@@ -139,17 +128,58 @@ export default function IncomeModal({
             display="default"
             onChange={(event, selectedDate) => setDate(selectedDate || date)}
           />
+
           <Text>Comments:</Text>
           <TextInput
             placeholder="Enter comments"
             value={comments}
             onChangeText={setComments}
-            style={{ borderBottomWidth: 1, marginBottom: 10 }}
+            style={styles.input}
           />
-          <Button title="Save" onPress={saveIncome} />
-          <Button title="Cancel" onPress={onClose} />
+
+          <View style={styles.buttonContainer}>
+            <Button title="Save" onPress={saveIncome} />
+            <Button title="Cancel" onPress={onClose} color="red" />
+          </View>
         </View>
       </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  input: {
+    borderBottomWidth: 1,
+    marginBottom: 10,
+    padding: 5,
+  },
+  picker: {
+    marginBottom: 10,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 5,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+});
