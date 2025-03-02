@@ -7,12 +7,15 @@ import {
   Text,
   Alert,
   StyleSheet,
+  Platform,
+  TouchableOpacity,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useIncomeStore } from '../viewModels/IncomeViewModel';
-import { Income } from '../models/Income';
+import { Category, Income } from '../models/Income';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 interface IncomeModalProps {
   visible: boolean;
@@ -26,11 +29,14 @@ export default function IncomeModal({
   initialData,
 }: IncomeModalProps) {
   const [profit, setProfit] = useState('');
-  const [category, setCategory] = useState('Salary');
+  const [category, setCategory] = useState<Category>('Second-hand Sell');
   const [date, setDate] = useState(new Date());
-  const [owner, setOwner] = useState('RR');
+  const [owner, setOwner] = useState('DD');
   const [comments, setComments] = useState(' ');
   const [error, setError] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showOwnerPicker, setShowOwnerPicker] = useState(false);
 
   const { addIncome, editIncome, totalIncome } = useIncomeStore();
 
@@ -46,9 +52,9 @@ export default function IncomeModal({
 
   const resetForm = () => {
     setProfit('');
-    setCategory('Salary');
+    setCategory('Second-hand Sell');
     setDate(new Date());
-    setOwner('RR');
+    setOwner('DD');
     setComments(' ');
   };
 
@@ -58,7 +64,6 @@ export default function IncomeModal({
       return;
     }
     setError('');
-
     const newIncome: Income = {
       id: initialData ? initialData.id : Date.now().toString(),
       date,
@@ -66,19 +71,9 @@ export default function IncomeModal({
       profit: Number(profit),
       owner,
       comments,
+      totalIncomeAtTime: totalIncome + Number(profit),
     };
     initialData ? editIncome(newIncome) : addIncome(newIncome);
-
-    if (totalIncome >= 300) {
-      Alert.alert(
-        'Investment Opportunity',
-        'Your total income has reached 300. Consider investing!',
-        [
-          { text: 'Invest Now', onPress: () => router.push('/investment') },
-          { text: 'Cancel', style: 'cancel' },
-        ],
-      );
-    }
 
     resetForm();
     onClose();
@@ -100,34 +95,124 @@ export default function IncomeModal({
           />
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
+          {/* Category Picker */}
           <Text>Category:</Text>
-          <Picker
-            selectedValue={category}
-            onValueChange={setCategory}
-            style={styles.picker}
+          <TouchableOpacity
+            onPress={() => setShowCategoryPicker(true)}
+            style={{
+              borderBottomWidth: 1,
+              paddingVertical: 8,
+              marginBottom: 10,
+            }}
           >
-            <Picker.Item label="Second-hand Sell" value="Second-hand Sell" />
-            <Picker.Item label="Fruit Sell" value="Fruit Sell" />
-            <Picker.Item label="Cashback" value="Cashback" />
-          </Picker>
+            <Text>{category}</Text>
+          </TouchableOpacity>
+          {showCategoryPicker && (
+            <Modal transparent={true} animationType="slide">
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: 'white',
+                    padding: 20,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Picker
+                    selectedValue={category}
+                    onValueChange={(itemValue) => {
+                      setCategory(itemValue);
+                      setShowCategoryPicker(false);
+                    }}
+                  >
+                    <Picker.Item
+                      label="Second-hand Sell"
+                      value="Second-hand Sell"
+                    />
+                    <Picker.Item label="Fruit Sell" value="Fruit Sell" />
+                    <Picker.Item label="Cashback" value="Cashback" />
+                  </Picker>
+                  <Button
+                    title="Cancel"
+                    onPress={() => setShowCategoryPicker(false)}
+                  />
+                </View>
+              </View>
+            </Modal>
+          )}
 
+          {/* Owner Picker */}
           <Text>Owner:</Text>
-          <Picker
-            selectedValue={owner}
-            onValueChange={setOwner}
-            style={styles.picker}
+          <TouchableOpacity
+            onPress={() => setShowOwnerPicker(true)}
+            style={{
+              borderBottomWidth: 1,
+              paddingVertical: 8,
+              marginBottom: 10,
+            }}
           >
-            <Picker.Item label="DD" value="DD" />
-            <Picker.Item label="RR" value="RR" />
-          </Picker>
+            <Text>{owner}</Text>
+          </TouchableOpacity>
+          {showOwnerPicker && (
+            <Modal transparent={true} animationType="slide">
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: 'white',
+                    padding: 20,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Picker
+                    selectedValue={owner}
+                    onValueChange={(itemValue) => {
+                      setOwner(itemValue);
+                      setShowOwnerPicker(false);
+                    }}
+                  >
+                    <Picker.Item label="DD" value="DD" />
+                    <Picker.Item label="RR" value="RR" />
+                  </Picker>
+                  <Button
+                    title="Cancel"
+                    onPress={() => setShowOwnerPicker(false)}
+                  />
+                </View>
+              </View>
+            </Modal>
+          )}
 
-          <Text>Date:</Text>
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => setDate(selectedDate || date)}
-          />
+          {/* Date Picker */}
+          <Text style={styles.label}>Date</Text>
+          <TouchableOpacity
+            style={styles.datePicker}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={styles.dateText}>{date.toDateString()}</Text>
+            <Ionicons name="calendar" size={20} color="black" />
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(Platform.OS === 'ios');
+                if (selectedDate) setDate(selectedDate);
+              }}
+            />
+          )}
 
           <Text>Comments:</Text>
           <TextInput
@@ -137,9 +222,13 @@ export default function IncomeModal({
             style={styles.input}
           />
 
-          <View style={styles.buttonContainer}>
-            <Button title="Save" onPress={saveIncome} />
-            <Button title="Cancel" onPress={onClose} color="red" />
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.button} onPress={onClose}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button]} onPress={saveIncome}>
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -177,9 +266,36 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 5,
   },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
   },
+  button: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 5,
+    backgroundColor: '#007AFF',
+  },
+  buttonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+  label: { fontSize: 16, marginTop: 10 },
+
+  datePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginTop: 5,
+  },
+  dateText: { fontSize: 16 },
 });

@@ -1,4 +1,10 @@
-import { Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  View,
+} from 'react-native';
 import { useIncomeStore } from '@/src/viewModels/IncomeViewModel';
 import { useState } from 'react';
 import IncomeModal from '@/src/components/IncomeModal';
@@ -10,7 +16,7 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
 
-  const { isHydrated } = useIncomeStore();
+  const { isHydrated, incomes } = useIncomeStore();
 
   const openEditModal = (income: Income) => {
     setSelectedIncome(income);
@@ -19,38 +25,46 @@ export default function HomeScreen() {
 
   if (isHydrated) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.title}>Welcome to Little Money Box!</Text>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Welcome to Little Money Box!</Text>
 
-        <IncomeList onEdit={openEditModal} />
+          {incomes.length > 0 && <IncomeList onEdit={openEditModal} />}
 
-        {/* Floating Action Button */}
-        <TouchableOpacity
-          style={styles.fab}
-          onPress={() => setModalVisible(true)}
-        >
-          <Ionicons name="add" size={32} color="white" />
-        </TouchableOpacity>
+          {/* Floating Action Button */}
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => setModalVisible(true)}
+          >
+            <Ionicons name="add" size={32} color="white" />
+          </TouchableOpacity>
 
-        <IncomeModal
-          visible={modalVisible}
-          onClose={() => {
-            setModalVisible(false);
-            setSelectedIncome(null);
-          }}
-          initialData={selectedIncome}
-        />
+          <IncomeModal
+            visible={modalVisible}
+            onClose={() => {
+              setModalVisible(false);
+              setSelectedIncome(null);
+            }}
+            initialData={selectedIncome}
+          />
+        </View>
       </SafeAreaView>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: 'white' },
   container: {
     flex: 1,
-    paddingTop: 20,
-    marginHorizontal: 5,
-    backgroundColor: '#f5f5f5',
+    padding: 5,
+    backgroundColor: 'white',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
   },
   fab: {
     position: 'absolute',
@@ -65,12 +79,6 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 2 },
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    textAlign: 'center',
   },
 
   header: {

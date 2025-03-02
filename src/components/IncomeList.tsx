@@ -69,9 +69,22 @@ export const IncomeList = ({ onEdit }: IncomeListProps) => {
             <View style={styles.row}>
               <Text style={styles.cell}>{item.date.toLocaleDateString()}</Text>
               <Text style={styles.cell}>{item.category}</Text>
-              <Text style={styles.cell}>${item.profit.toFixed(2)}</Text>
+              <View style={styles.profitContainer}>
+                <Text
+                  style={
+                    item.category === 'Investment'
+                      ? styles.invest
+                      : styles.profit
+                  }
+                >
+                  ${item.profit.toFixed(2)}
+                </Text>
+                <Text style={styles.totalIncomeHistory}>
+                  Total: ${item.totalIncomeAtTime.toFixed(2)}
+                </Text>
+              </View>
               <Text style={styles.cell}>{item.owner}</Text>
-              <Text style={styles.cell}>{item.comments || 'N/A'}</Text>
+              <Text style={styles.cell}>{item.comments}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -131,5 +144,22 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     paddingVertical: 5,
+  },
+  profitContainer: {
+    alignItems: 'flex-end',
+  },
+  profit: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2ecc71',
+  },
+  invest: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#e74c3c',
+  },
+  totalIncomeHistory: {
+    fontSize: 10,
+    color: 'gray',
   },
 });

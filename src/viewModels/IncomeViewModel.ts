@@ -20,7 +20,7 @@ interface IncomeState {
 
 function handleTotalIncome(state: IncomeState, income: Income) {
   const newTotal = state.totalIncome + income.profit;
-  if (newTotal >= 300) {
+  if (newTotal >= 300 && income.category !== 'Investment') {
     Alert.alert(
       'Investment Opportunity',
       'Your total income has reached 300! Consider investing.',
@@ -31,10 +31,6 @@ function handleTotalIncome(state: IncomeState, income: Income) {
         },
       ],
     );
-    return {
-      incomes: [...state.incomes, income],
-      totalIncome: newTotal - 300, // Reset after alert
-    };
   }
   return {
     incomes: [...state.incomes, income],
@@ -68,10 +64,9 @@ export const useIncomeStore = create<IncomeState>()(
           );
           const oldProfit = oldIncome ? oldIncome.profit : 0;
 
-          // Remove old profit and add new profit
           const adjustedState = {
             ...state,
-            totalIncome: state.totalIncome - oldProfit, // Subtract old profit first
+            totalIncome: state.totalIncome - oldProfit, // Remove old profit first
             incomes: state.incomes.map((income) =>
               income.id === updatedIncome.id ? updatedIncome : income,
             ),

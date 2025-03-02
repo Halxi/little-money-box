@@ -7,9 +7,9 @@ export default function Layout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Income',
+          title: 'Transactions',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="list" size={size} color={color} />
           ),
         }}
       />
@@ -20,7 +20,6 @@ export default function Layout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="trending-up" size={size} color={color} />
           ),
-          headerTitle: 'My Investments',
         }}
       />
     </Tabs>

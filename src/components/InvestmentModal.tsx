@@ -11,6 +11,8 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { Investment } from '../models/Investment';
+import { useIncomeStore } from '../viewModels/IncomeViewModel';
+import { Income } from '../models/Income';
 
 interface InvestmentFormProps {
   visible: boolean;
@@ -35,6 +37,13 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
     existingInvestment?.date ? new Date(existingInvestment.date) : new Date(),
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const { totalIncome, addIncome } = useIncomeStore();
+
+  const resetForm = () => {
+    setStockName('');
+    setStockPrice('');
+    setDate(new Date());
+  };
 
   const handleSave = () => {
     if (!stockName.trim() || !stockPrice) {
@@ -48,7 +57,17 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
       date: date, // Save as ISO string
     };
 
+    const newIncome: Income = {
+      id: existingInvestment?.id || Date.now().toString(),
+      category: 'Investment',
+      date: date,
+      profit: parseFloat(stockPrice),
+      owner: 'RR',
+      totalIncomeAtTime: totalIncome - parseFloat(stockPrice),
+    };
+    addIncome(newIncome);
     onSave(newInvestment);
+    resetForm();
     onClose();
   };
 
